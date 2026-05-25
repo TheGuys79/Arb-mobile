@@ -11,6 +11,7 @@ export default function HomeScreen() {
   const [odds1, setOdds1] = useState("");
   const [odds2, setOdds2] = useState("");
   const [result, setResult] = useState("");
+const API_KEY = process.env.EXPO_PUBLIC_ODDS_API_KEY;
 
   // Convert American odds to decimal
   const toDecimal = (odds: number) => {
