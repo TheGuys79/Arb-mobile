@@ -14,7 +14,7 @@ export async function example1_ImpliedProbability() {
   console.log('\n=== Example 1: Calculate Implied Probability ===\n');
 
   const odds1 = -110;
-  const odds2 = +150;
+  const odds2 = 150;
 
   const prob1 = ArbitrageCalculator.calculateImpliedProbability(odds1);
   const prob2 = ArbitrageCalculator.calculateImpliedProbability(odds2);
@@ -30,7 +30,7 @@ export function example2_StakeDistribution() {
   console.log('\n=== Example 2: Calculate Optimal Stake Distribution ===\n');
 
   const odds1 = -120;
-  const odds2 = +130;
+  const odds2 = 130;
   const totalStake = 100;
 
   const distribution = ArbitrageCalculator.calculateOptimalStakeDistribution(
@@ -52,7 +52,7 @@ export function example3_ExpectedProfit() {
   console.log('\n=== Example 3: Calculate Expected Profit ===\n');
 
   const odds1 = -120;
-  const odds2 = +130;
+  const odds2 = 130;
   const bet1 = 56.21;
   const bet2 = 43.79;
 
@@ -80,12 +80,12 @@ export async function example4_FindArbitrage() {
 
   try {
     // Step 1: Get live odds
-    console.log('📍 Step 1: Fetching live odds...');
+    console.log('📋 Step 1: Fetching live odds...');
     const sportsbooks = await OddsAPI.fetchOddsFromAllSportsbooks(SPORTS.NFL);
     console.log(`Found ${sportsbooks.length} sportsbooks\n`);
 
     // Step 2: Find opportunities
-    console.log('📍 Step 2: Finding arbitrage opportunities...');
+    console.log('📋 Step 2: Finding arbitrage opportunities...');
     const opportunities = ArbitrageCalculator.findArbitrageOpportunities(
       sportsbooks,
       'example_event',
@@ -97,7 +97,7 @@ export async function example4_FindArbitrage() {
 
     // Step 3: Display results
     if (opportunities.length > 0) {
-      console.log('📍 Step 3: Displaying best opportunity:\n');
+      console.log('📋 Step 3: Displaying best opportunity:\n');
       const bestOpp = opportunities[0];
 
       console.log(`Event: ${bestOpp.event}`);
@@ -179,9 +179,9 @@ export function example5_ScaleOpportunity() {
  * Run all examples
  */
 export async function runAllExamples() {
-  console.log('\n\n╔═══════════════════════════════════════════════════════════╗');
+  console.log('\n\n╔════════════════════════════════════════════════════════╗');
   console.log('║  ARBITRAGE CALCULATOR - USAGE EXAMPLES                  ║');
-  console.log('╚═══════════════════════════════════════════════════════════╝');
+  console.log('╚════════════════════════════════════════════════════════╝');
 
   example1_ImpliedProbability();
   example2_StakeDistribution();

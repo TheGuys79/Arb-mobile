@@ -10,6 +10,7 @@
  */
 
 import { getArbitrageCalculator } from '../arbitrage-calculator';
+import { ARBITRAGE_THRESHOLDS } from '@/src/constants/sportsbooks';
 import { SportsBook } from '@/src/types/odds';
 
 describe('Arbitrage Calculator Service', () => {
@@ -119,7 +120,7 @@ describe('Arbitrage Calculator Service', () => {
         },
         {
           name: 'pinnacle',
-          odds: { home: +100, away: +110 },
+          odds: { home: 100, away: 110 },
           timestamp: Date.now(),
         },
       ];
@@ -153,7 +154,7 @@ describe('Arbitrage Calculator Service', () => {
         },
         {
           name: 'pinnacle',
-          odds: { home: +105, away: +115 },
+          odds: { home: 105, away: 115 },
           timestamp: Date.now(),
         },
       ];
@@ -279,7 +280,7 @@ describe('Arbitrage Calculator Service', () => {
         },
         {
           name: 'pinnacle',
-          odds: { home: +100, away: +110 },
+          odds: { home: 100, away: 110 },
           timestamp: Date.now(),
           sport: 'nfl',
         },
@@ -384,7 +385,60 @@ describe('Arbitrage Calculator Service', () => {
       expect(opportunities.length).toBe(0);
     });
   });
-});
 
-// Import threshold for tests
-import { ARBITRAGE_THRESHOLDS } from '@/src/constants/sportsbooks';
+  // ======================================================================
+  // TEST SUITE 7: OPPORTUNITY SCALING
+  // ======================================================================
+
+  describe('scaleOpportunityToStake', () => {
+    it('should scale opportunity to different stake', () => {
+      const baseOpp: any = {
+        id: 'test_opp',
+        sport: 'nfl',
+        event: 'Test',
+        homeTeam: 'A',
+        awayTeam: 'B',
+        sportsbooks: {
+          book1: {
+            name: 'draftkings',
+            odds: -120,
+            bet: 56.21,
+            profit: 1.5,
+            potentialReturn: 103.5,
+          },
+          book2: {
+            name: 'pinnacle',
+            odds: 130,
+            bet: 43.79,
+            profit: 1.5,
+            potentialReturn: 100.72,
+          },
+        },
+        totalStake: 100,
+        profit: 1.5,
+        profitMargin: 1.5,
+        impliedProbability: 0.98,
+        odds: { home: -120, away: 130 },
+        expiresAt: Date.now() + 300000,
+        createdAt: Date.now(),
+        lastUpdated: Date.now(),
+      };
+
+      const scaled = calculator.scaleOpportunityToStake(baseOpp, 500);
+
+      expect(scaled.totalStake).toBe(500);
+      expect(scaled.profit).toBeCloseTo(baseOpp.profit * 5, 1);
+      expect(scaled.sportsbooks.book1.bet).toBeCloseTo(baseOpp.sportsbooks.book1.bet * 5, 1);
+    });
+
+    it('should throw error for invalid scale amount', () => {
+      const baseOpp: any = {
+        id: 'test',
+        totalStake: 100,
+      } as any;
+
+      expect(() => calculator.scaleOpportunityToStake(baseOpp, 0)).toThrow();
+      expect(() => calculator.scaleOpportunityToStake(baseOpp, -50)).toThrow();
+    });
+  });
+});

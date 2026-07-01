@@ -310,7 +310,7 @@ class ArbitrageCalculatorService {
 
     if (!check.isArbitrage) {
       console.log(
-        `[Arbitrage] ⏭️  ${book1.name} (${odds1}) vs ${book2.name} (${odds2}): ${check.message}`
+        `[Arbitrage] ↩️  ${book1.name} (${odds1}) vs ${book2.name} (${odds2}): ${check.message}`
       );
       return null;
     }
