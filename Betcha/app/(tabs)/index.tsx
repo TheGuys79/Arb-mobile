@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  ScrollView,
   View,
   Text,
   TextInput,
@@ -10,24 +11,33 @@ import {
 export default function HomeScreen() {
   const [odds1, setOdds1] = useState("");
   const [odds2, setOdds2] = useState("");
-  const [betAmount, setBetAmount] = useState("100");
+  const [total, setTotal] = useState("");
   const [result, setResult] = useState("");
 
-  // Connected for future live odds
-  const API_KEY = process.env.EXPO_PUBLIC_ODDS_API_KEY;
-
-  // Convert American odds to decimal odds
   const toDecimal = (odds: number) => {
-    if (odds > 0) return 1 + odds / 100;
-    return 1 + 100 / Math.abs(odds);
+    if (odds >= 0) {
+      return odds / 100 + 1;
+    }
+
+    return 100 / Math.abs(odds) + 1;
+  };
+
+  const parseOdds = (value: string) => {
+    const cleaned = value.trim().replace("+", "");
+    return Number(cleaned);
   };
 
   const calculateArb = () => {
-    const o1 = parseFloat(odds1);
-    const o2 = parseFloat(odds2);
-    const total = Number(betAmount);
+    const o1 = parseOdds(odds1);
+    const o2 = parseOdds(odds2);
+    const stake = Number(total);
 
-    if (isNaN(o1) || isNaN(o2) || isNaN(total) || total <= 0) {
+    if (
+      Number.isNaN(o1) ||
+      Number.isNaN(o2) ||
+      Number.isNaN(stake) ||
+      stake <= 0
+    ) {
       setResult("Please enter valid odds and a bet amount.");
       return;
     }
@@ -35,34 +45,39 @@ export default function HomeScreen() {
     const d1 = toDecimal(o1);
     const d2 = toDecimal(o2);
 
-    const check = 1 / d1 + 1 / d2;
+    const implied1 = 1 / d1;
+    const implied2 = 1 / d2;
+    const bookPercentage = implied1 + implied2;
 
-    if (check < 1) {
-      const bet1 = (total / d1) / check;
-      const bet2 = (total / d2) / check;
-
-      const payout = bet1 * d1;
-      const profit = payout - total;
-
+    if (bookPercentage >= 1) {
       setResult(
-        `🎉 ARBITRAGE FOUND!
-
-Bet on Sportsbook 1:
-$${bet1.toFixed(2)}
-
-Bet on Sportsbook 2:
-$${bet2.toFixed(2)}
-
-Guaranteed Profit:
-$${profit.toFixed(2)}`
+        "No arbitrage found with these odds. Try different odds."
       );
-    } else {
-      setResult("❌ No arbitrage found.");
+      return;
     }
+
+    const profitPercent = (1 / bookPercentage - 1) * 100;
+
+    const stake1 = (stake * implied1) / bookPercentage;
+    const stake2 = (stake * implied2) / bookPercentage;
+
+    const payout = stake1 * d1;
+    const profit = payout - stake;
+
+    setResult(
+      `🎉 ARBITRAGE FOUND!\n\n` +
+        `Bet on Sportsbook 1: $${stake1.toFixed(2)}\n\n` +
+        `Bet on Sportsbook 2: $${stake2.toFixed(2)}\n\n` +
+        `Guaranteed Profit: $${profit.toFixed(2)}\n\n` +
+        `Profit Percentage: ${profitPercent.toFixed(2)}%`
+    );
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Text style={styles.title}>Betcha Arbitrage 💰</Text>
 
       <TextInput
@@ -71,22 +86,24 @@ $${profit.toFixed(2)}`
         placeholderTextColor="#aaa"
         value={odds1}
         onChangeText={setOdds1}
+        keyboardType="numbers-and-punctuation"
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Odds 2 (e.g. -130)"
+        placeholder="Odds 2 (e.g. -120)"
         placeholderTextColor="#aaa"
         value={odds2}
         onChangeText={setOdds2}
+        keyboardType="numbers-and-punctuation"
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Bet Amount (e.g. 250)"
+        placeholder="Total Bet Amount (e.g. 100)"
         placeholderTextColor="#aaa"
-        value={betAmount}
-        onChangeText={setBetAmount}
+        value={total}
+        onChangeText={setTotal}
         keyboardType="numeric"
       />
 
@@ -94,13 +111,15 @@ $${profit.toFixed(2)}`
         style={styles.button}
         onPress={calculateArb}
       >
-        <Text style={styles.buttonText}>
-          Check Arbitrage
-        </Text>
+        <Text style={styles.buttonText}>Check Arbitrage</Text>
       </TouchableOpacity>
 
-      <Text style={styles.result}>{result}</Text>
-    </View>
+      {result !== "" && (
+        <View style={styles.resultBox}>
+          <Text style={styles.result}>{result}</Text>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
@@ -108,44 +127,56 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f172a",
+  },
+
+  contentContainer: {
     padding: 20,
-    justifyContent: "center",
+    alignItems: "stretch",
   },
 
   title: {
     fontSize: 26,
-    color: "#22c55e",
     fontWeight: "bold",
-    marginBottom: 20,
+    color: "#22c55e",
     textAlign: "center",
+    marginBottom: 30,
+    marginTop: 20,
   },
 
   input: {
-    backgroundColor: "#1e293b",
-    color: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
+    backgroundColor: "#334155",
+    color: "#ffffff",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 16,
   },
 
   button: {
-    backgroundColor: "#22c55e",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#00ff00",
+    padding: 18,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
   },
 
   buttonText: {
-    color: "#fff",
+    color: "#0f172a",
+    fontSize: 18,
     fontWeight: "bold",
   },
 
+  resultBox: {
+    backgroundColor: "#172554",
+    padding: 20,
+    borderRadius: 12,
+    marginTop: 25,
+  },
+
   result: {
-    color: "#fff",
-    marginTop: 20,
+    color: "#ffffff",
+    fontSize: 18,
+    lineHeight: 28,
     textAlign: "center",
-    fontSize: 16,
-    lineHeight: 24,
   },
 });
