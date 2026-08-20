@@ -8,6 +8,16 @@ import {
   StyleSheet,
 } from "react-native";
 
+const SPORTSBOOKS = [
+  "DraftKings",
+  "FanDuel",
+  "BetMGM",
+  "Caesars",
+  "BetRivers",
+  "ESPN BET",
+  "Fanatics Sportsbook",
+];
+
 export default function HomeScreen() {
   const [odds1, setOdds1] = useState("");
   const [odds2, setOdds2] = useState("");
