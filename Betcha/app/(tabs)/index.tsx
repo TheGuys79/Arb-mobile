@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   ScrollView,
   View,
@@ -19,6 +20,10 @@ const SPORTSBOOKS = [
 ];
 
 export default function HomeScreen() {
+  const [selectedSportsbook, setSelectedSportsbook] = useState(
+    SPORTSBOOKS[0]
+  );
+
   const [odds1, setOdds1] = useState("");
   const [odds2, setOdds2] = useState("");
   const [total, setTotal] = useState("");
@@ -57,6 +62,7 @@ export default function HomeScreen() {
 
     const implied1 = 1 / d1;
     const implied2 = 1 / d2;
+
     const bookPercentage = implied1 + implied2;
 
     if (bookPercentage >= 1) {
@@ -76,8 +82,8 @@ export default function HomeScreen() {
 
     setResult(
       `🎉 ARBITRAGE FOUND!\n\n` +
-        `Bet on Sportsbook 1: $${stake1.toFixed(2)}\n\n` +
-        `Bet on Sportsbook 2: $${stake2.toFixed(2)}\n\n` +
+        `${selectedSportsbook}: $${stake1.toFixed(2)}\n\n` +
+        `Sportsbook 2: $${stake2.toFixed(2)}\n\n` +
         `Guaranteed Profit: $${profit.toFixed(2)}\n\n` +
         `Profit Percentage: ${profitPercent.toFixed(2)}%`
     );
@@ -89,6 +95,40 @@ export default function HomeScreen() {
       contentContainerStyle={styles.contentContainer}
     >
       <Text style={styles.title}>Betcha Arbitrage 💰</Text>
+
+      <Text style={styles.sectionTitle}>Choose Sportsbook</Text>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.sportsbookScroll}
+      >
+        {SPORTSBOOKS.map((sportsbook) => (
+          <TouchableOpacity
+            key={sportsbook}
+            style={[
+              styles.sportsbookButton,
+              selectedSportsbook === sportsbook &&
+                styles.selectedSportsbook,
+            ]}
+            onPress={() => setSelectedSportsbook(sportsbook)}
+          >
+            <Text
+              style={[
+                styles.sportsbookText,
+                selectedSportsbook === sportsbook &&
+                  styles.selectedSportsbookText,
+              ]}
+            >
+              {sportsbook}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <Text style={styles.selectedText}>
+        Selected: {selectedSportsbook}
+      </Text>
 
       <TextInput
         style={styles.input}
@@ -149,8 +189,48 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#22c55e",
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 25,
     marginTop: 20,
+  },
+
+  sectionTitle: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
+  sportsbookScroll: {
+    marginBottom: 10,
+  },
+
+  sportsbookButton: {
+    backgroundColor: "#334155",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+
+  selectedSportsbook: {
+    backgroundColor: "#22c55e",
+  },
+
+  sportsbookText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  selectedSportsbookText: {
+    color: "#0f172a",
+  },
+
+  selectedText: {
+    color: "#22c55e",
+    fontSize: 15,
+    fontWeight: "bold",
+    marginBottom: 15,
   },
 
   input: {
